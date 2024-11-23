@@ -1,0 +1,51 @@
+[submodule "src/ReplicatedStorage/Modules/Mega"]
+	path = src/ReplicatedStorage/Modules/Mega
+	url = https://github.com/ThieTre/mega-framework
+[submodule "src/ReplicatedStorage/Modules/Tycoons"]
+	path = src/ReplicatedStorage/Modules/Tycoons
+	url = https://github.com/ThieTre/tycoons-module
+[submodule "src/ReplicatedStorage/Modules/Damage"]
+	path = src/ReplicatedStorage/Modules/Damage
+	url = https://github.com/ThieTre/damage-module
+[submodule "src/ReplicatedStorage/Modules/Guns"]
+	path = src/ReplicatedStorage/Modules/Guns
+	url = https://github.com/ThieTre/guns-module
+[submodule "src/ReplicatedStorage/Modules/Explosions"]
+	path = src/ReplicatedStorage/Modules/Explosions
+	url = https://github.com/ThieTre/explosions-module
+[submodule "src/ReplicatedStorage/Modules/Monetization"]
+	path = src/ReplicatedStorage/Modules/Monetization
+	url = https://github.com/ThieTre/monetization-module
+[submodule "src/ReplicatedStorage/Modules/Parties"]
+	path = src/ReplicatedStorage/Modules/Parties
+	url = https://github.com/ThieTre/parties-module
+[submodule "src/ReplicatedStorage/Modules/Badges"]
+	path = src/ReplicatedStorage/Modules/Badges
+	url = https://github.com/ThieTre/badges-module
+[submodule "src/ReplicatedStorage/Modules/Backpack"]
+	path = src/ReplicatedStorage/Modules/Backpack
+	url = https://github.com/ThieTre/backpack-module
+[submodule "src/ReplicatedStorage/Modules/Casting"]
+	path = src/ReplicatedStorage/Modules/Casting
+	url = https://github.com/ThieTre/casting-module
+[submodule "src/ReplicatedStorage/Modules/AMS"]
+	path = src/ReplicatedStorage/Modules/AMS
+	url = https://github.com/ThieTre/ams-module
+[submodule "src/ReplicatedStorage/Modules/Prizes"]
+	path = src/ReplicatedStorage/Modules/Prizes
+	url = https://github.com/ThieTre/prizes-module
+[submodule "src/ReplicatedStorage/Modules/Sentries"]
+	path = src/ReplicatedStorage/Modules/Sentries
+	url = https://github.com/ThieTre/sentries-module
+[submodule "src/ReplicatedStorage/Modules/Strafer"]
+	path = src/ReplicatedStorage/Modules/Strafer
+	url = https://github.com/ThieTre/strafer-module
+[submodule "src/ReplicatedStorage/Modules/Turrets"]
+	path = src/ReplicatedStorage/Modules/Turrets
+	url = https://github.com/ThieTre/turrets-module
+[submodule "src/ReplicatedStorage/Modules/Vehicles"]
+	path = src/ReplicatedStorage/Modules/Vehicles
+	url = https://github.com/ThieTre/vehicles-module
+[submodule "src/ReplicatedStorage/Modules/TycoonGame"]
+	path = src/ReplicatedStorage/Modules/TycoonGame
+	url = https://github.com/ThieTre/tycoon-game-module

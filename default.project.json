@@ -1,0 +1,36 @@
+{
+  "name": "space-armory-tycoon",
+  "emitLegacyScripts": false,
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "Modules": {
+        "$path": "src/ReplicatedStorage/Modules",
+        "$className": "Folder"
+      }
+    },
+    "ServerStorage": {
+      "$className": "ServerStorage",
+      "Modules": {
+        "$path": "src/ServerStorage/Modules",
+        "$className": "Folder"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "$path": "src/ServerScriptService"
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "MegaStarterPlayerScripts": {
+        "$className": "Folder",
+        "$path": "src/StarterPlayer/MegaStarterPlayerScripts"
+      },
+      "MegaStarterCharacterScripts": {
+        "$className": "Folder",
+        "$path": "src/StarterPlayer/MegaStarterCharacterScripts"
+      }
+    }
+  }
+}
