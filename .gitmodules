@@ -49,3 +49,6 @@
 [submodule "src/ReplicatedStorage/Modules/TycoonGame"]
 	path = src/ReplicatedStorage/Modules/TycoonGame
 	url = https://github.com/ThieTre/tycoon-game-module
+[submodule "src/ReplicatedStorage/Modules/PointCapture"]
+	path = src/ReplicatedStorage/Modules/PointCapture
+	url = https://github.com/ThieTre/point-capture-module
