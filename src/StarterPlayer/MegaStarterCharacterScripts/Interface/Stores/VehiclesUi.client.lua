@@ -40,8 +40,7 @@ local typSelectionBox = replicated.TypeSelectionBox
 
 -- Other instances
 local sounds = canvas.Sounds
-local spawnerVal =
-	InstModify.create("ObjectValue", canvas, { Name = "CurrentSpawner" })
+local spawnerVal = InstModify.create("ObjectValue", canvas, { Name = "CurrentSpawner" })
 
 local Ui = {}
 
@@ -179,8 +178,7 @@ function Ui.updateDisplay(name, info, owned, isVariant, force)
 			end
 			isInTransaction = true
 			local spawner = spawnerVal.Value
-			local success =
-				VehicleManager.clientRequestVehicleSpawn(name, spawner)
+			local success = VehicleManager.clientRequestVehicleSpawn(name, spawner)
 			if success then
 				sounds.Spawn:Play()
 			end
@@ -313,8 +311,7 @@ function Ui.updateVehicleScroller()
 
 		-- Add tile
 		local owned = table.find(playerVehicles, vName)
-		local missingValues =
-			Table.Difference(vTycoonInfo or {}, playerVehicles)
+		local missingValues = Table.Difference(vTycoonInfo or {}, playerVehicles)
 		local locked = not owned and next(missingValues)
 		local tile = Ui.addVehicleTile(vName, vInfo, owned, locked)
 		if count == 0 then
@@ -363,8 +360,7 @@ local function showUi()
 	Ui.updateVehicleScroller()
 	while canvas.Visible and spawnerVal.Value do
 		local spawner = spawnerVal.Value
-		local distance =
-			LocalPlayer:DistanceFromCharacter(spawner.PromptPart.Position)
+		local distance = LocalPlayer:DistanceFromCharacter(spawner.PromptPart.Position)
 		if distance > SETTINGS.MaxSpawnPointDistance then
 			GameVehicleUtils.clientSetUiDisplay(false)
 			break

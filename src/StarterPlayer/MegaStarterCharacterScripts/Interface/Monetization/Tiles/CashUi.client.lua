@@ -13,12 +13,16 @@ local TyUtils = require(Modules.Tycoons.Utils)
 local LocalPlayer = game.Players.LocalPlayer
 
 local SETTINGS = require(ReplicatedStorage.Settings.Monetization)
-local LOG = Logging:new('Monetization.Cash')
-local BOOST_DESC = 'Activate a cash boost to earn additional income in your tycoon while you play!'
-local CASH_DESC = 'Purchase cash to immediately add to your current tycoon balance!'
+local LOG = Logging:new("Monetization.Cash")
+local BOOST_DESC =
+	"Activate a cash boost to earn additional income in your tycoon while you play!"
+local CASH_DESC =
+	"Purchase cash to immediately add to your current tycoon balance!"
 
 -- Ui elements
-local frame = LocalPlayer.PlayerGui.Monetization:WaitForChild('Store').Frame.Cash.Cash
+local frame = LocalPlayer.PlayerGui
+	:WaitForChild("Monetization")
+	:WaitForChild("Store").Frame.Cash.Cash
 local replicated = frame.Parent.Replicated
 local boostsButton = frame.BoostButton
 local cashButton = frame.CashButton
@@ -52,8 +56,6 @@ table.sort(cashSortRef, function(a, b)
 	return aSortRef < bSortRef
 end)
 
-
-
 choiceSelection.Visible = true
 tileSelection.Visible = true
 
@@ -61,20 +63,18 @@ local function updatePlayerBoosts()
 	playerBoosts = BoostManager.getClientInventory()
 end
 
-
 local function formatDuration(minutes, useAbv)
 	if minutes == 60 then
-		return (useAbv and '1 hr') or '1 Hour'
+		return (useAbv and "1 hr") or "1 Hour"
 	elseif minutes > 60 then
-		local hours = math.round(minutes*100/60)/100 
-		return hours .. ((useAbv and ' hr') or ' Hours')
+		local hours = math.round(minutes * 100 / 60) / 100
+		return hours .. ((useAbv and " hr") or " Hours")
 	else
-		return minutes .. ((useAbv and ' min') or ' Minutes')
+		return minutes .. ((useAbv and " min") or " Minutes")
 	end
 end
 
 local Ui = {}
-
 
 -- =============== Display ==============
 
@@ -92,14 +92,13 @@ function Ui.displayBoost(name, id)
 	sounds.Select:Play()
 
 	-- Style
-	boostsFrame.Percent.Text = (1 + info.BoostRatio)..'X'
+	boostsFrame.Percent.Text = (1 + info.BoostRatio) .. "X"
 	boostsFrame.Duration.Text = formatDuration(info.BoostDuration)
 	itemImage.Image = info.Image
 	itemImage.Title.Text = name
 	mainButton.Price.Robux.Text = info.RobuxPrice
 
 	if id then
-
 		-- Count active boosts
 		local activeCount = 0
 		for _id, info in playerBoosts do
@@ -114,21 +113,21 @@ function Ui.displayBoost(name, id)
 
 		if activeCount >= SETTINGS.CashBoosts.MaxActiveBoosts then
 			-- Format main button
-			mainButton.BackgroundColor3 = Color3.new(0.584314, 0.584314, 0.584314)
+			mainButton.BackgroundColor3 =
+				Color3.new(0.584314, 0.584314, 0.584314)
 			mainButton.Locked.Visible = true
-			mainButton.Activate.Text = 'MAX ACTIVATED'
+			mainButton.Activate.Text = "MAX ACTIVATED"
 		else
 			-- Format main button
 			mainButton.BackgroundColor3 = Color3.new(1, 0.741176, 0.298039)
-			mainButton.Activate.Text = 'ACTIVATE'
-			displayConn =  mainButton.MouseButton1Click:Connect(function()
+			mainButton.Activate.Text = "ACTIVATE"
+			displayConn = mainButton.MouseButton1Click:Connect(function()
 				displayConn:Disconnect()
 				local success = BoostManager.clientRequestActivation(id)
 				Ui.updateBoostScroller(name)
 			end)
 		end
 	else
-
 		-- Format main button
 		mainButton.BackgroundColor3 = Color3.new(1, 0.47451, 0.482353)
 		mainButton.Activate.Visible = false
@@ -139,34 +138,39 @@ function Ui.displayBoost(name, id)
 			MarketService:PromptProductPurchase(LocalPlayer, info.Id)
 			-- Wait for transaction to complete
 			local purchaseConn
-			purchaseConn = MarketService.PromptProductPurchaseFinished:Connect(function(_uid, productId, isPurchased)
-				if productId ~= info.Id or not isPurchased then
-					return
-				end
-				sounds.Buy:Play()
-				purchaseConn:Disconnect()
-				-- Wait until the boost id shows up in the player's data
-				for i in MiscUtils.count() do
-					updatePlayerBoosts()
-					local found = false
-					for id, info in playerBoosts do
-						if info.Name == name then
-							-- Boost found
-							found = true
+			purchaseConn = MarketService.PromptProductPurchaseFinished:Connect(
+				function(_uid, productId, isPurchased)
+					if productId ~= info.Id or not isPurchased then
+						return
+					end
+					sounds.Buy:Play()
+					purchaseConn:Disconnect()
+					-- Wait until the boost id shows up in the player's data
+					for i in MiscUtils.count() do
+						updatePlayerBoosts()
+						local found = false
+						for id, info in playerBoosts do
+							if info.Name == name then
+								-- Boost found
+								found = true
+								break
+							end
+						end
+						if found then
 							break
 						end
+						if i > 5 / 0.1 then
+							LOG:Error(
+								"Failed to find purchased boost for user "
+									.. LocalPlayer.UserId
+							)
+							break
+						end
+						task.wait(0.1)
 					end
-					if found then
-						break
-					end
-					if i > 5/0.1 then
-						LOG:Error('Failed to find purchased boost for user ' .. LocalPlayer.UserId)
-						break
-					end
-					task.wait(0.1)
+					Ui.updateBoostScroller()
 				end
-				Ui.updateBoostScroller()
-			end)
+			)
 		end)
 	end
 end
@@ -184,7 +188,7 @@ function Ui.displayCash(name)
 	sounds.Select:Play()
 
 	-- Style
-	cashFrame.Cash.Text = '$'..TyUtils.formatNumber(info.Value)
+	cashFrame.Cash.Text = "$" .. TyUtils.formatNumber(info.Value)
 	itemImage.Image = info.Image
 	itemImage.Title.Text = name
 	mainButton.Price.Robux.Text = info.RobuxPrice
@@ -218,13 +222,13 @@ function Ui.addBoostTile(name)
 
 	-- Style
 	tile.Name = name
-	tile.Owned.Visible = owned 
+	tile.Owned.Visible = owned
 	tile.Image.Image = info.Image
 	tile.Icon.Visible = true
 	tile.Hex.LocalScript.Enabled = not owned
 	tile.BackgroundColor3 = info.TileColor
 	local h, s, v = info.TileColor:ToHSV()
-	tile.UIStroke.Color = Color3.fromHSV(h, s, v*1.5)
+	tile.UIStroke.Color = Color3.fromHSV(h, s, v * 1.5)
 	tile.Visible = true
 	if ownedCount > 0 then
 		tile.Count.Visible = true
@@ -251,7 +255,7 @@ function Ui.addCashTile(name)
 	tile.Image.Image = info.Image
 	tile.BackgroundColor3 = info.TileColor
 	local h, s, v = info.TileColor:ToHSV()
-	tile.UIStroke.Color = Color3.fromHSV(h, s, v*1.5)
+	tile.UIStroke.Color = Color3.fromHSV(h, s, v * 1.5)
 	tile.Visible = true
 
 	tile.Image.MouseButton1Click:Connect(function()
@@ -282,8 +286,6 @@ function Ui.addActiveBoostTile(image, remaingDuration)
 	end)
 end
 
-
-
 -- =============== Scroller ==============
 
 local updatingBoostScroller = false
@@ -299,14 +301,12 @@ function Ui.updateBoostScroller(targetItem)
 	-- Sorting reference for boost info
 	local sortRef = Table.Keys(boostInfo)
 	table.sort(sortRef, function(a, b)
-
 		-- Compare price
 		local aInfo = boostInfo[a]
 		local bInfo = boostInfo[b]
 		local aSortRef = aInfo.RobuxPrice
 		local bSortRef = bInfo.RobuxPrice
 		return aSortRef < bSortRef
-
 	end)
 
 	-- Add tiles
@@ -343,7 +343,10 @@ function Ui.updateActiveBoostsScroller()
 		if not info.IsActive then
 			continue
 		end
-		Ui.addActiveBoostTile(boostInfo[info.Name].Image, info.RemainingDuration)
+		Ui.addActiveBoostTile(
+			boostInfo[info.Name].Image,
+			info.RemainingDuration
+		)
 	end
 end
 
@@ -386,7 +389,6 @@ function Ui.selectCash()
 	boostsFrame.Visible = false
 	cashFrame.Visible = true
 	Ui.updateCashScroller()
-
 end
 
 -- =============== Connections ==============
@@ -398,12 +400,12 @@ cashButton.MouseButton1Click:Connect(Ui.selectCash)
 BoostManager.evaluateIconBadge(playerBoosts)
 
 event.Event:Connect(function(typ, content)
-	if typ == 'DisplayPage' then
-		if content['Frame'] == frame.Parent then
+	if typ == "DisplayPage" then
+		if content["Frame"] == frame.Parent then
 			pageLayout:JumpTo(frame.Parent)
-			local choice = content['Choice'] or 'Boosts'
-			local item = content['TargetItem']
-			Ui['select'..choice](item)
+			local choice = content["Choice"] or "Boosts"
+			local item = content["TargetItem"]
+			Ui["select" .. choice](item)
 		end
 	end
 end)
@@ -411,4 +413,3 @@ end)
 mainButton.MouseButton1Click:Connect(function()
 	sounds.Purchase:Play()
 end)
-

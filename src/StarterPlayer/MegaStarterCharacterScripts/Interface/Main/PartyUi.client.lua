@@ -1,28 +1,26 @@
-local ReplicatedStorage = game:GetService('ReplicatedStorage')
-local CollectionService = game:GetService('CollectionService')
-local HttpService = game:GetService('HttpService')
-local SocialService = game:GetService('SocialService')
-local Teams = game:GetService('Teams')
-local Players = game:GetService('Players')
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CollectionService = game:GetService("CollectionService")
+local HttpService = game:GetService("HttpService")
+local SocialService = game:GetService("SocialService")
+local Teams = game:GetService("Teams")
+local Players = game:GetService("Players")
 local Modules = ReplicatedStorage.Modules
 
-local MegaUtils = require(Modules.Mega.Utils)
+local PlayerUtils = require(Modules.Mega.Utils.Player)
 local InterfaceUtils = require(Modules.Mega.Interface.Utils)
+local InstModify = require(Modules.Mega.Instances.Modify)
 local PartyUtils = require(Modules.Parties.Utils)
-local ConnManager = require(Modules.Mega.Utils.ConnManager)
 
 local LocalPlayer = game.Players.LocalPlayer
 
-local frame = LocalPlayer.PlayerGui:WaitForChild('Main').Party
+local frame = LocalPlayer.PlayerGui:WaitForChild("Main").Party
 local replicated = frame.Replicated
 local inviteScroller = frame.Invite.ScrollingFrame
 local partyScroller = frame.Party.ScrollingFrame
 local sounds = frame.Sounds
 
 local remote = Modules.Parties.RemoteEvent
-local currentParty = PartyUtils.playerGetMemebers()
-local labelConns = ConnManager:new()
-
+local currentParty = nil
 
 local function canSendGameInvite(sendingPlayer)
 	local success, canSend = pcall(function()
@@ -31,54 +29,42 @@ local function canSendGameInvite(sendingPlayer)
 	return success and canSend
 end
 
+local function updateMemebers()
+	currentParty = PartyUtils.playerGetMemebers() or {}
+end
 
-local function evaluatePartyLabels(removedMembers)
-	
-	if not removedMembers then
-		local currentMembers = currentParty or {}
-		-- Evaluate current members labels
-		for _, player: Player in currentMembers do
-			if player == LocalPlayer then
+-- Added to party, removed from party, character added
+
+local function evaluatePartyLabels()
+	for _, player in Players:GetPlayers() do
+		if player == LocalPlayer then
+			continue
+		end
+		local hrp = PlayerUtils.getObjects(player, "HumanoidRootPart")
+		if not hrp then
+			continue
+		end
+		if table.find(currentParty, player) then
+			if hrp:FindFirstChild("PartyLabel") then
 				continue
 			end
-			local humanoid, hrp = MegaUtils.Player.getObjects(player, 'Humanoid', 'HumanoidRootPart')
-			if not humanoid or not hrp then
-				continue
-			end
-			if hrp:FindFirstChild('PartyLabel') then
-				continue
-			end
+			local humanoid = hrp.Parent.Humanoid
 			local label = frame.PartyLabel:Clone()
 			label.Enabled = true
-			label.ImageLabel.Image = Players:GetUserThumbnailAsync(player.UserId, 
-				Enum.ThumbnailType.HeadShot, 
+			label.ImageLabel.Image = Players:GetUserThumbnailAsync(
+				player.UserId,
+				Enum.ThumbnailType.HeadShot,
 				Enum.ThumbnailSize.Size420x420
 			)
 			label.Parent = hrp
+
 			humanoid.Died:Once(function()
 				label:Destroy()
-				player.CharacterAdded:Once(function()
-					evaluatePartyLabels()
-				end)
 			end)
-		end
-	else
-		-- Evaluate removed members
-		for _, player: Player in removedMembers do
-			local hrp: BasePart = MegaUtils.Player.getObjects(player, 'HumanoidRootPart')
-			if not hrp then
-				continue
-			end
-			local existingLabel = hrp:FindFirstChild('PartyLabel')
-			if existingLabel then
-				existingLabel:Destroy()
-			end
+		else
+			InstModify.destroyExistingChild(hrp, "PartyLabel")
 		end
 	end
-end
-
-while LocalPlayer.Team == Teams.Choosing do
-	task.wait(1)
 end
 
 local inTransaction = false
@@ -100,8 +86,9 @@ local function updateFrame()
 		-- Create tile
 		local tile = replicated.UserTile:Clone()
 		tile.TextButton.Text = player.Name
-		tile.ImageLabel.Image = Players:GetUserThumbnailAsync(player.UserId, 
-			Enum.ThumbnailType.HeadShot, 
+		tile.ImageLabel.Image = Players:GetUserThumbnailAsync(
+			player.UserId,
+			Enum.ThumbnailType.HeadShot,
 			Enum.ThumbnailSize.Size420x420
 		)
 		tile.Visible = true
@@ -122,17 +109,15 @@ local function updateFrame()
 	inTransaction = false
 end
 
-frame.Party.LeaveButton.MouseButton1Click:Connect(function()
-	if currentParty then
-		local isRemoved = PartyUtils.playerLeaveParty()
-	end
-end)
-
+while LocalPlayer.Team == Teams.Choosing do
+	task.wait(1)
+end
 
 if canSendGameInvite(LocalPlayer) then
-	local inviteOptions = Instance.new('ExperienceInviteOptions')
+	local inviteOptions = Instance.new("ExperienceInviteOptions")
 	inviteOptions.PromptMessage = "Get your friends to join your game for a free prize!"
-	inviteOptions.LaunchData = HttpService:JSONEncode({sendingUser=LocalPlayer.UserId})
+	inviteOptions.LaunchData =
+		HttpService:JSONEncode({ sendingUser = LocalPlayer.UserId })
 	frame.Friends.TextButton.MouseButton1Click:Connect(function()
 		SocialService:PromptGameInvite(LocalPlayer, inviteOptions)
 	end)
@@ -140,42 +125,36 @@ else
 	frame.Friends.Visible = false
 end
 
+updateMemebers()
+evaluatePartyLabels()
+updateFrame()
 
-remote.OnClientEvent:Connect(function(typ, content)
-	if typ == 'MemberAdding' then
-		if content['Player'] == LocalPlayer then
-			-- Local player was added to a new party
-			currentParty = PartyUtils.playerGetMemebers()
-		else
-			if not currentParty then
-				currentParty = {content['Player']}
-			else
-				table.insert(currentParty, content['Player'])
-			end
-		end
-		evaluatePartyLabels()
-		sounds.Added:Play()
-	elseif typ == 'MemberRemoving' then
-		if content['Player'] == LocalPlayer then
-			evaluatePartyLabels(currentParty)
-			currentParty = nil 
-		else
-			table.remove(currentParty, table.find(currentParty, content['Player']))
-			evaluatePartyLabels({content['Player']})
-		end
-		sounds.Removed:Play()
+frame.Party.LeaveButton.MouseButton1Click:Connect(function()
+	if currentParty then
+		PartyUtils.playerLeaveParty()
 	end
-	updateFrame()
 end)
 
-frame:GetPropertyChangedSignal('Visible'):Connect(function()
+remote.OnClientEvent:Connect(function(typ)
+	if typ == "MemberAdding" then
+		sounds.Added:Play()
+	elseif typ == "MemberRemoving" then
+		sounds.Removed:Play()
+	end
+	updateMemebers()
+	updateFrame()
+	evaluatePartyLabels()
+end)
+
+frame:GetPropertyChangedSignal("Visible"):Connect(function()
 	if frame.Visible then
 		updateFrame()
 	end
 end)
 
-CollectionService:GetInstanceAddedSignal('Player'):Connect(function()
-	-- Player additions or deaths
-	evaluatePartyLabels()
+PlayerUtils.inclusivePlayerAdded(function(player: Player)
+	player.CharacterAdded:Connect(function(character)
+		character:WaitForChild("HumanoidRootPart")
+		evaluatePartyLabels()
+	end)
 end)
-

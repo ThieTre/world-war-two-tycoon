@@ -462,4 +462,34 @@ wipe.Action = function(_self, args)
 	PlayerData:Set(target, "LastLogin", os.time())
 end
 
+-- =============== Misc ============
+
+local challenge =
+	admin:AddCommand("challenge", 99, "Challenge a player to a 1v1")
+challenge:AddPositional("player", "player to challenge")
+
+challenge.Action = function(_self, args)
+	local map = workspace["ChallengeMap"]
+	local caller: Player = args[".caller"]
+	local player: Player = game.Players[args["player"]]
+
+	local c1 = caller.CharacterAdded:Connect(function(character)
+		character:PivotTo(map.SpawnA.CFrame + Vector3.new(0, 5, 0))
+	end)
+
+	local c2 = player.CharacterAdded:Connect(function(character)
+		character:PivotTo(map.SpawnB.CFrame + Vector3.new(0, 5, 0))
+	end)
+
+	caller:LoadCharacter()
+	player:LoadCharacter()
+
+	caller:GetPropertyChangedSignal("Team"):Connect(function()
+		c1:Disconnect()
+	end)
+	player:GetPropertyChangedSignal("Team"):Connect(function()
+		c2:Disconnect()
+	end)
+end
+
 admin:Start()

@@ -43,8 +43,7 @@ if hasClaimed then
 	return
 end
 
-local prizeInfo =
-	PrizeUtils.getPrizeInfo(SETTINGS.PrizeName, SETTINGS.PrizeType)
+local prizeInfo = PrizeUtils.getPrizeInfo(SETTINGS.PrizeName, SETTINGS.PrizeType)
 model.ImagePart.SurfaceGui.ImageLabel.Image = prizeInfo.Image
 
 local function requestClaim()

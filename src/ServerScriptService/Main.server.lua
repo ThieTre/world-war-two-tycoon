@@ -8,7 +8,7 @@ local Mega = Modules.Mega
 local Logging = require(Mega.Logging)
 local LiveConfig = require(Mega.Data.LiveConfig)
 local Instances = require(Mega.Instances)
-local PlayerUtils = require(Mega.Utils.Player)
+local TutorialPopups = require(Mega.Tutorial.Popup)
 local Loader = require(Mega.Interface.Loader)
 local PlayerUtils = require(Modules.Mega.Utils.Player)
 local GunUtils = require(Modules.Guns.Utils)
@@ -29,7 +29,7 @@ local tycoons = TycoonManager:new(workspace["Tycoon Systems"].Factory)
 local function onCharacterAdded(player: Player, character: Model)
 	local humanoid: Humanoid = PlayerUtils.waitForObjects(player, "Humanoid")
 
-	--character.ModelStreamingMode = Enum.ModelStreamingMode.Persistent -- Do we need this?
+	character.ModelStreamingMode = Enum.ModelStreamingMode.Persistent -- Do we need this?
 
 	Strafer.serverMethod(player, "SetEnabled", false)
 
@@ -43,8 +43,7 @@ local function onCharacterAdded(player: Player, character: Model)
 	then
 		humanoid.MaxHealth *= 2
 		humanoid.Health *= 2
-		local highlight =
-			game.ServerStorage.Assets.Misc.ShieldHighlight:Clone()
+		local highlight = game.ServerStorage.Assets.Misc.ShieldHighlight:Clone()
 		highlight.Parent = character
 		Notification.clientCoreNotification(player, {
 			Title = "2X Health",
@@ -80,7 +79,7 @@ local function onCharacterAdded(player: Player, character: Model)
 		local playerTool = player.Backpack:FindFirstChildWhichIsA("Tool")
 		local characterTool = character:FindFirstChildWhichIsA("Tool")
 		if not playerTool and not characterTool then
-			GunUtils.giveGun(player, "Kriss")
+			GunUtils.giveGun(player, "1911")
 		end
 	end
 
@@ -90,12 +89,8 @@ local function onCharacterAdded(player: Player, character: Model)
 	end
 
 	-- Clean accessories
-	for _, accessory in
-		Instances.Search.getDescendantsOfType(character, "Accessory")
-	do
-		for _, part in
-			Instances.Search.getDescendantsOfType(accessory, "BasePart")
-		do
+	for _, accessory in Instances.Search.getDescendantsOfType(character, "Accessory") do
+		for _, part in Instances.Search.getDescendantsOfType(accessory, "BasePart") do
 			part.CanCollide = false
 			part.CanQuery = false
 			part.CanTouch = false
@@ -104,7 +99,7 @@ local function onCharacterAdded(player: Player, character: Model)
 end
 
 local function onPlayerAdded(player: Player)
-	Loader.playerStartLoad(player)
+	-- Loader.playerStartLoad(player)
 
 	player.Team = game.Teams.Choosing
 
@@ -113,15 +108,8 @@ local function onPlayerAdded(player: Player)
 	-- Setup player config and leaderbaord
 	local configsFolder =
 		Instances.Modify.create("Folder", player, { Name = "Configs" })
-	LiveConfig.create(
-		configsFolder,
-		{ name = "Tycoon", data = { Balance = 0 } }
-	)
-	LeaderBoard.setStat(
-		player,
-		"Rebirths",
-		PlayerData:Lookup(player, "Rebirths", 0)
-	)
+	LiveConfig.create(configsFolder, { name = "Tycoon", data = { Balance = 0 } })
+	LeaderBoard.setStat(player, "Rebirths", PlayerData:Lookup(player, "Rebirths", 0))
 
 	-- Setup character
 	player.CharacterAdded:Connect(function(character)
@@ -146,11 +134,7 @@ local function onPlayerAdded(player: Player)
 		end
 	end)
 	if not success then
-		LOG:Error(
-			"Failed to process join data for %s: %s ",
-			player.UserId,
-			err
-		)
+		LOG:Error("Failed to process join data for %s: %s ", player.UserId, err)
 	end
 
 	-- Try to load player into previous tycoon if possible
@@ -169,7 +153,7 @@ local function onPlayerAdded(player: Player)
 			player:RequestStreamAroundAsync(targetPlot.Position, 10)
 			player:LoadCharacter()
 			Loader.playerStopLoad(player)
-			MusicManager.serverMethod(player, "SetPlaylist", "Intense")
+			MusicManager.serverMethod(player, "SetPlaylist", "Basic")
 			return
 		end
 	end
@@ -181,10 +165,7 @@ local function onPlayerAdded(player: Player)
 	player:LoadCharacter()
 	local elapsed = 0
 	local min, max = unpack(GAME_SETTINGS.LoadTimeRange)
-	while
-		(elapsed < min or not player:HasAppearanceLoaded())
-		and elapsed < max
-	do
+	while (elapsed < min or not player:HasAppearanceLoaded()) and elapsed < max do
 		task.wait(1)
 		elapsed += 1
 	end
@@ -195,7 +176,9 @@ local function onPlayerAdded(player: Player)
 
 	Loader.playerStopLoad(player)
 
-	MusicManager.serverMethod(player, "SetPlaylist", "Intense")
+	MusicManager.serverMethod(player, "SetPlaylist", "Basic")
+
+	-- TutorialPopups.conditionalClientFullscreen(player, "UpdateNotes", 1)
 
 	if RunService:IsStudio() then
 		tycoons:RequestOwnerAdd(player, tycoons.plots:RandomChoice())
