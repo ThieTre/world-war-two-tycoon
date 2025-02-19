@@ -178,7 +178,7 @@ local function onPlayerAdded(player: Player)
 
 	MusicManager.serverMethod(player, "SetPlaylist", "Basic")
 
-	-- TutorialPopups.conditionalClientFullscreen(player, "UpdateNotes", 1)
+	TutorialPopups.conditionalClientFullscreen(player, "PlanesUpdate", 1)
 
 	if RunService:IsStudio() then
 		tycoons:RequestOwnerAdd(player, tycoons.plots:RandomChoice())

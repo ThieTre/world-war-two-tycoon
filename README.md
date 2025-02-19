@@ -12,3 +12,13 @@ Initial release
     - Fixed bug causing UI to fail to open
     - Fixed duplicate tycoon team color
     - Fixed spinner missing prize options
+
+## v1.1.0
+- **Additions**
+    - Added 8 new planes 
+    - Added new Tankbane anti-material rifle
+    - Added M16 anti-aircraft vehicle
+    - Added naval gun auto sentry 
+
+- **Improvements**
+    - Balancing changes to many guns and vehicles

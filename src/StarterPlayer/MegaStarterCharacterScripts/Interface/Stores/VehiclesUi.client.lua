@@ -25,7 +25,6 @@ local tycoonMap = VehicleManager.Data.tycoonMap[tycoonName] -- mapping of tycoon
 local infoMap = VehicleManager.Data.infoMap -- mapping of vehicles and settings
 local variantMap = VehicleManager.Data.variantMap
 local playerVehicles = VehicleManager.clientGetTycoonVehicles() -- array of the player's vehicles
-local includeTypes = nil
 
 -- Ui instances
 local canvas = LocalPlayer.PlayerGui:WaitForChild("Stores").Vehicles
@@ -283,6 +282,8 @@ function Ui.updateVehicleScroller()
 	content.Chest.Visible = false
 	Interface.Utils.clearUiChildren(content.ScrollingFrame)
 	local sortRef = Table.Keys(tycoonMap)
+	local terminalSettings = require(spawnerVal.Value.Settings)
+	local includeTypes = terminalSettings.IncludeTypes
 	table.sort(sortRef, function(a, b)
 		local aInfo = infoMap[a]
 		local bInfo = infoMap[b]
@@ -305,6 +306,7 @@ function Ui.updateVehicleScroller()
 		if not vInfo or vInfo.VariantOf then
 			continue
 		end
+
 		if includeTypes and not table.find(includeTypes, vInfo.Type) then
 			continue
 		end
