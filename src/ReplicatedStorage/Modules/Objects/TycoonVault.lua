@@ -195,6 +195,7 @@ function Vault:Secure()
 
 	-- Effects
 	self.effectsManager:RunAll("Secure")
+	self.effectsManager:RunAll("StopAlarms")
 	self.icon.Enabled = true
 end
 

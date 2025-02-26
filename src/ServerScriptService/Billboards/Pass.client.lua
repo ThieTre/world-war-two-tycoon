@@ -2,17 +2,24 @@ if not script.Parent.Parent then
 	return
 end
 
+local Table = require(game.ReplicatedStorage.Modules.Mega.DataStructures.Table)
+
+local PASS_IDS =
+	Table.GetFlattened(require(game.ReplicatedStorage.Settings.Monetization.GamePasses))
+require(game.ReplicatedStorage.Settings.Monetization.GamePasses)
+
 local MarketService = game:GetService("MarketplaceService")
 
 local LocalPlayer = game.Players.LocalPlayer
 
-local model = script.Parent
-local id = model:GetAttribute("PassId")
-local main = model:FindFirstChild("Main")
+local instance = script.Parent
+local name = instance.Name:gsub(" Board", "")
+local id = PASS_IDS[name][1]
+local main = instance:FindFirstChild("Main")
 
 local clickDetecor = Instance.new("ClickDetector")
 clickDetecor.MaxActivationDistance = 100
-clickDetecor.Parent = main or model
+clickDetecor.Parent = main or instance
 
 if main then
 	local prompt = Instance.new("ProximityPrompt")

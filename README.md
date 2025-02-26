@@ -22,3 +22,28 @@ Initial release
 
 - **Improvements**
     - Balancing changes to many guns and vehicles
+
+## v1.2.0
+- **Additions**
+    - Added 8 new vehicles
+        - 4 Russian tanks
+        - Zippo (Sherman variant)
+        - Veloce flame thrower tank
+        - M16 Anti-Air vehicle
+        - Tiger 1 (Tiger variant)
+    - Added new turrets and gadgets to most tanks
+        - Mounted MG
+        - Flamethrower
+        - Smoke launcher
+    - Added two new game pass tanks
+    - Added new chest
+    - Added auto fire for mobile users
+
+- **Improvements**
+    - Significantly reduced plane health and damage
+    - Significantly reduced small arms damage to vehicles 
+
+- **Fixes**
+    - Fixed multiple issues with UI failing to display
+    - Fixed a bug causing loot bags to not work properly
+    - Added walls preventing player from climbing into bases

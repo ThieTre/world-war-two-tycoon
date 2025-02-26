@@ -28,12 +28,11 @@ local LootBag = {}
 LootBag.__index = LootBag
 export type LootBag = typeof(setmetatable({}, LootBag))
 
-function LootBag:new(value: number, sourcePlayer: Player): LootBag
+function LootBag:new(part: BasePart, sourcePlayer: Player): LootBag
 	self = self ~= LootBag and self or setmetatable({}, LootBag)
-
-	self.part = ServerStorage.Assets.Objects.LootBag:Clone()
+	self.part = part
 	self.source = sourcePlayer
-	self.config = LiveConfig:new(self.part, { Value = value })
+	self.config = LiveConfig:new(self.part)
 	self.prompt = InstModify.create("ProximityPrompt", self.part)
 	self.rigid = InstModify.create(
 		"RigidConstraint",
@@ -75,7 +74,7 @@ function LootBag:_Setup()
 	-- Remote event
 	self.connections:Add(
 		"Remote",
-		self.remote.OnServerEvent:Connect(function(player, typ, content)
+		self.remote.OnServerEvent:Connect(function(player, typ)
 			if typ == "Drop" and self.owner == player then
 				self:Drop()
 			end
@@ -116,8 +115,7 @@ function LootBag:Attach(player: Player)
 		already has a bag, then combine them
 	]]
 
-	local character, humanoid =
-		PlayerUtils.getObjects(player, "Character", "Humanoid")
+	local character, humanoid = PlayerUtils.getObjects(player, "Character", "Humanoid")
 	if not character or humanoid.Health <= 0 then
 		return
 	end
@@ -128,11 +126,12 @@ function LootBag:Attach(player: Player)
 		return
 	end
 
+	self.part.Anchored = false
+
 	-- Evaluate player's current bag status
 	local bagValue = character:FindFirstChild("BagValue")
 	if not bagValue then
-		bagValue =
-			InstModify.create("ObjectValue", character, { Name = "BagValue" })
+		bagValue = InstModify.create("ObjectValue", character, { Name = "BagValue" })
 	elseif bagValue.Value then
 		-- The character already has a bag
 		local currentBag: BasePart = bagValue.Value
@@ -189,18 +188,13 @@ end
 
 function LootBag:Collect(player: Player)
 	LOG:Debug("Collecting loot bag for player " .. player.Name)
-	TyUtils.updatePlayerCash(
-		player,
-		self.config.Value,
-		{ notification = true }
-	)
+	TyUtils.updatePlayerCash(player, self.config.Value, { notification = true })
 	--Badges.awardBadge(player, Badges.badges.LootBag)
 	self:Destroy()
 end
 
 function LootBag:SetOwner(player: Player?)
 	if not player then
-		self.owner = nil
 		self.connections:Remove("OwnerDeath", "OwnerNearby")
 	else
 		self.owner = player
@@ -252,14 +246,25 @@ function LootBag.addValue(player: Player, value: number, sourcePlayer: Player?)
 		return
 	end
 
-	local bagPart = character:FindFirstChild("BagValue")
-		and character.BagValue.Value
+	local bagPart = character:FindFirstChild("BagValue") and character.BagValue.Value
+
 	if bagPart then
 		local config = LiveConfig:new(bagPart)
 		config.Value += value
 	else
-		local bag = LootBag:new(value, sourcePlayer)
-		bag:Attach(player)
+		-- Create bag part
+		local part = ServerStorage.Assets.Objects.LootBag:Clone()
+		part.Anchored = true
+		part.CFrame = CFrame.new(-10000, 10000, -10000)
+
+		part:SetAttribute("Value", value)
+		part:SetAttribute("Owner", player.UserId)
+		part:SetAttribute("Source", sourcePlayer and sourcePlayer.UserId)
+
+		local clone = script.Cloned.LootBag:Clone()
+		clone.Parent = part
+		clone.Enabled = true
+		part.Parent = workspace
 	end
 
 	-- Send notificaiton
